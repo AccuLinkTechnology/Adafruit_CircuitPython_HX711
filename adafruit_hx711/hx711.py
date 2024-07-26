@@ -32,7 +32,7 @@ try:
 except ImportError:
     pass
 
-__version__ = "0.0.0+auto.0"
+__version__ = "1.0.1"
 __repo__ = "https://github.com/your-repo/Adafruit_CircuitPython_HX711.git"
 
 
@@ -97,24 +97,36 @@ class HX711:
             else self._tare_value_a
         )
 
+    def microsecond_delay(microseconds):
+        start_time = time.perf_counter_ns()
+        end_time = start_time + microseconds * 1000  # Convert microseconds to nanoseconds
+        while time.perf_counter_ns() < end_time:
+            pass
+
     def _read_channel_raw(self, chan_gain: int) -> int:
         """
         Read raw ADC value with specified gain.
 
         :param chan_gain: Gain and channel configuration.
-        :return: Raw ADC value.
+        :return: Raw ADC value.git clone https://github.com/tatobari/hx711py
         """
         while self.is_busy:
             pass  # Wait until the HX711 is ready
+
+        def microsecond_delay(microseconds):
+            start_time = time.perf_counter_ns()
+            end_time = start_time + microseconds * 1000  # Convert microseconds to nanoseconds
+            while time.perf_counter_ns() < end_time:
+                pass
 
         self._clock_pin.value = False
         value = 0
         for _ in range(24):  # Read 24 bits from DOUT
             self._clock_pin.value = True
-            time.sleep(0.000001)  # 1 microsecond delay
+            microsecond_delay(1)  # 1 microsecond delay
             value = (value << 1) | self._data_pin.value
             self._clock_pin.value = False
-            time.sleep(0.000001)  # 1 microsecond delay
+            microsecond_delay(1)  # 1 microsecond delay
 
         # Set gain for next reading
         for _ in range(chan_gain - 24):
